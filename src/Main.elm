@@ -17,7 +17,7 @@ view model =
 
 
 thumbnails =
-    div [ id "thumbnails" ] [ img1, img2, img3 ]
+    div [ id "thumbnails" ] [ img1, img2 ]
 
 
 header =
