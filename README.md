@@ -11,9 +11,12 @@
 7. Under `Preference` setup toolchain for Elm compiler, elm-format and elm-test
 
 # Run
-1. Run `elm reactor` in terminal
-2. Visit `http://localhost:8000/src/Main.elm`
+1. Run `elm make src/Main.elm --output=build/app.js` in terminal
+2. Open `build/index.hmtl` in browser
 
 # Run Tests
 1. `elm-test`
+
+# Development
+1. `npx elm-test --watch`
 
