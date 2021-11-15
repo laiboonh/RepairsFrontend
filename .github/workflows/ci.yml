@@ -1,7 +1,7 @@
 name: GitHub Actions Demo
 on: [push]
 jobs:
-  checkout:
+  CI:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -10,19 +10,19 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - name: Installing node16
+      - name: Install node16
         uses: actions/setup-node@v2
         with:
           node-version: '16'
-      - name: Installing elm
-        uses: jorelali/setup-elm@v3
-        with:
-          elm-version: '0.19.1'
-      - name: Installing elm-test
+      - name: Install elm 0.19.1
+        run: |
+          curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
+          gunzip elm.gz
+          chmod +x elm
+          sudo mv elm /usr/local/bin/
+      - name: Install elm-test
         run: npm install -g elm-test
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - run: elm-test
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
+      - name: Run tests
+        run: elm-test
       - run: echo "🍏 This job's status is ${{ job.status }}."
