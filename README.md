@@ -1,4 +1,4 @@
-![Simple workflow](https://github.com/laiboonh/RepairsFrontend/actions/workflows/ci.yml/badge.svg)
+![Simple workflow](https://github.com/laiboonh/RepairsFrontend/actions/workflows/ci_cd.yml/badge.svg)
 
 # Setup
 1. Install elm https://guide.elm-lang.org/install/elm.html
