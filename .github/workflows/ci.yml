@@ -22,5 +22,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
+      - run: curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
+      - run: gunzip elm.gz
+      - run: ls ${{ github.workspace }}
+      - run: chmod +x elm
+      - run: sudo mv elm /usr/local/bin/
       - run: npm install -g elm-test
       - run: elm-test
