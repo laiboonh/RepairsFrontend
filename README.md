@@ -11,4 +11,6 @@
 1. Run `elm reactor` in terminal
 2. Visit `http://localhost:8000/src/Main.elm`
 
+# Run Tests
+1. `elm-test`
 

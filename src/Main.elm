@@ -1,11 +1,15 @@
-module Main exposing (main)
+module Main exposing (initialModel, main, view)
 
 import Html exposing (div, h1, img, text)
 import Html.Attributes exposing (id, src)
 
 
+initialModel =
+    "NA"
+
+
 main =
-    view "NA"
+    view initialModel
 
 
 view model =
