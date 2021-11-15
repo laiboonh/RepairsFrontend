@@ -27,9 +27,7 @@ jobs:
         run: elm-test
       - name: Build
         run: |
-          elm make src/Main.elm
-          mkdir build
-          mv index.html build
+          elm make src/Main.elm --output=build/app.js
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}/*

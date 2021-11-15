@@ -1,4 +1,4 @@
 .idea
 *.iml
 elm-stuff
-index.html
+build/app.js
