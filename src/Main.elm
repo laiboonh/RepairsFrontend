@@ -21,7 +21,7 @@ thumbnails =
 
 
 header =
-    h1 [] [ text "Photo Groove" ]
+    h1 [] [ text "Photo Booth" ]
 
 
 img1 =

@@ -1,4 +1,5 @@
-![Simple workflow](https://github.com/laiboonh/RepairsFrontend/actions/workflows/ci_cd.yml/badge.svg)
+![Github Actions](https://github.com/laiboonh/RepairsFrontend/actions/workflows/ci_cd.yml/badge.svg)
+[![Netlify](https://api.netlify.com/api/v1/badges/d49f0e26-f487-47e6-8172-471e94ec7359/deploy-status)](https://app.netlify.com/sites/quirky-shannon-65b4ce/deploys)
 
 # Setup
 1. Install elm https://guide.elm-lang.org/install/elm.html

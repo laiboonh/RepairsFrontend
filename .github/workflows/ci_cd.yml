@@ -1,4 +1,4 @@
-name: RepairsFrontend
+name: Github Actions
 on: [push]
 jobs:
   ci_cd:
