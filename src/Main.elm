@@ -1,9 +1,12 @@
 module Main exposing (Msg(..), initialModel, main, urlPrefix, view)
 
+import Array exposing (Array, fromList)
 import Browser
 import Html exposing (Html, button, div, h1, h3, img, input, label, text)
 import Html.Attributes exposing (class, classList, id, name, src, type_)
 import Html.Events exposing (onClick)
+import Platform.Sub as Sub
+import Random
 
 
 type alias Photo =
@@ -18,6 +21,7 @@ type Msg
     = ClickedPhoto String
     | ClickedSize ThumbnailSize
     | ClickedSurpriseMe
+    | GotSelectedIndex Int
 
 
 type ThumbnailSize
@@ -31,11 +35,13 @@ initialModel =
     { photos = [ { url = "1.jpeg" }, { url = "2.jpeg" }, { url = "3.jpeg" } ], selectedUrl = "1.jpeg", chosenSize = Medium }
 
 
+main : Program () Model Msg
 main =
-    Browser.sandbox
-        { init = initialModel
+    Browser.element
+        { init = \_ -> ( initialModel, Cmd.none )
         , view = view
         , update = update
+        , subscriptions = \_ -> Sub.none
         }
 
 
@@ -78,20 +84,39 @@ surpriseButton =
 {- update -}
 
 
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickedPhoto url ->
-            { model | selectedUrl = url }
+            ( { model | selectedUrl = url }, Cmd.none )
 
         ClickedSurpriseMe ->
-            { model | selectedUrl = "2.jpeg" }
+            ( model, Random.generate GotSelectedIndex (randomPhotoPicker model.photos) )
 
         ClickedSize thumbnailSize ->
-            { model | chosenSize = thumbnailSize }
+            ( { model | chosenSize = thumbnailSize }, Cmd.none )
+
+        GotSelectedIndex index ->
+            ( { model | selectedUrl = getPhotoUrl model.photos index }, Cmd.none )
 
 
 
 {- Helper functions -}
+
+
+getPhotoUrl : List Photo -> Int -> String
+getPhotoUrl photos index =
+    case Array.get index (fromList photos) of
+        Just photo ->
+            photo.url
+
+        Nothing ->
+            ""
+
+
+randomPhotoPicker : List Photo -> Random.Generator Int
+randomPhotoPicker photos =
+    Random.int 0 (List.length photos - 1)
 
 
 sizeToString : ThumbnailSize -> String

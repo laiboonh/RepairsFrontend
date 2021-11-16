@@ -19,4 +19,5 @@
 
 # Development
 1. `npx elm-test --watch`
+2. To add dependencies `elm install elm/random`
 
