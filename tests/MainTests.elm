@@ -3,7 +3,7 @@ module MainTests exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Html.Attributes as Attr
-import Main exposing (initialModel, urlPrefix, view)
+import Main exposing (Msg(..), initialModel, urlPrefix, view)
 import Test exposing (..)
 import Test.Html.Event as Event
 import Test.Html.Query as Query
@@ -48,5 +48,5 @@ photoClick =
                 |> Query.fromHtml
                 |> Query.find [ tag "img", attribute (Attr.src (urlPrefix ++ selectedUrl)) ]
                 |> Event.simulate Event.click
-                |> Event.expect { description = "ClickedPhoto", data = selectedUrl }
+                |> Event.expect (ClickedPhoto selectedUrl)
         )
