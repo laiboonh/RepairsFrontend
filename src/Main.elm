@@ -1,4 +1,4 @@
-module Main exposing (Msg(..), initialModel, main, urlPrefix, view)
+module Main exposing (Model, Msg(..), Status(..), ThumbnailSize(..), main, urlPrefix, view)
 
 import Array exposing (Array, fromList)
 import Browser

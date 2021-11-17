@@ -3,11 +3,20 @@ module MainTests exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Html.Attributes as Attr
-import Main exposing (Msg(..), initialModel, urlPrefix, view)
+import Main exposing (Model, Msg(..), Status(..), ThumbnailSize(..), urlPrefix, view)
 import Test exposing (..)
 import Test.Html.Event as Event
 import Test.Html.Query as Query
 import Test.Html.Selector exposing (attribute, classes, tag)
+
+
+photos =
+    [ { url = "1.jpeg" }, { url = "2.jpeg" }, { url = "3.jpeg" } ]
+
+
+initialModel : Model
+initialModel =
+    { status = Loaded photos (Just "1.jpeg"), chosenSize = Medium }
 
 
 renderImage : Test
