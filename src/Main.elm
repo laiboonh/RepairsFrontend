@@ -1,9 +1,8 @@
 module Main exposing (Model, Msg(..), Status(..), ThumbnailSize(..), main, urlPrefix, view)
 
-import Array exposing (Array, fromList)
 import Browser
 import Html exposing (Html, button, div, h1, h3, img, input, label, text)
-import Html.Attributes exposing (class, classList, id, name, src, type_)
+import Html.Attributes exposing (checked, class, classList, id, name, src, type_)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
 import Platform.Sub as Sub
@@ -68,7 +67,7 @@ view model =
             div [ class "content" ] [ header ]
 
         Loaded photos maybeSelectedUrl ->
-            div [ class "content" ] [ header, viewSizeChooserTitle, viewSizeChooser, surpriseButton, thumbnails photos maybeSelectedUrl model.chosenSize, largePhoto maybeSelectedUrl ]
+            div [ class "content" ] [ header, viewSizeChooserTitle, viewSizeChooser model.chosenSize, surpriseButton, thumbnails photos maybeSelectedUrl model.chosenSize, largePhoto maybeSelectedUrl ]
 
         Errored error ->
             div [ class "content" ] [ text error ]
@@ -82,13 +81,13 @@ viewSizeChooserTitle =
     h3 [] [ text "Thumbnail Size" ]
 
 
-viewSizeChooser =
-    div [ id "choose-size" ] (List.map viewSizeRadio [ Small, Medium, Large ])
+viewSizeChooser chosenSize =
+    div [ id "choose-size" ] (List.map (viewSizeRadio chosenSize) [ Small, Medium, Large ])
 
 
-viewSizeRadio : ThumbnailSize -> Html Msg
-viewSizeRadio thumbnailSize =
-    label [] [ input [ type_ "radio", name "size", onClick (ClickedSize thumbnailSize) ] [], text (sizeToString thumbnailSize) ]
+viewSizeRadio : ThumbnailSize -> ThumbnailSize -> Html Msg
+viewSizeRadio chosenSize thumbnailSize =
+    label [] [ input [ type_ "radio", name "size", onClick (ClickedSize thumbnailSize), checked (chosenSize == thumbnailSize) ] [], text (sizeToString thumbnailSize) ]
 
 
 thumbnails : List Photo -> Maybe String -> ThumbnailSize -> Html Msg
