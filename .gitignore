@@ -2,3 +2,4 @@
 *.iml
 elm-stuff
 build/app.js
+build/app.min.js

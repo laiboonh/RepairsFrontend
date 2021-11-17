@@ -7,11 +7,12 @@
 3. Try `elm-repl` to see that it works
 4. Install elm-format `sudo npm install elm-format -g`
 5. Install elm-test `sudo npm install elm-test -g`
-6. Install IntelliJ Elm plugin 
-7. Under `Preference` setup toolchain for Elm compiler, elm-format and elm-test
+6. Install uglifyjs `sudo npm install uglify-js -g`
+7. Install IntelliJ Elm plugin 
+8. Under `Preference` setup toolchain for Elm compiler, elm-format and elm-test
 
 # Run
-1. Run `elm make src/Main.elm --output=build/app.js` in terminal
+1. Run `./optimize.sh` in terminal
 2. Open `build/index.hmtl` in browser
 
 # Run Tests
