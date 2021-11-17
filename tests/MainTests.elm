@@ -11,7 +11,7 @@ import Test.Html.Selector exposing (attribute, classes, tag)
 
 
 photos =
-    [ { url = "1.jpeg" }, { url = "2.jpeg" }, { url = "3.jpeg" } ]
+    [ { url = "1.jpeg", size = 1, title = "" }, { url = "2.jpeg", size = 1, title = "" }, { url = "3.jpeg", size = 1, title = "" } ]
 
 
 initialModel : Model
