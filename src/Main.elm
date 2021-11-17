@@ -2,9 +2,11 @@ module Main exposing (Model, Msg(..), Status(..), ThumbnailSize(..), main, urlPr
 
 import Browser
 import Html exposing (Html, button, div, h1, h3, img, input, label, text)
-import Html.Attributes exposing (checked, class, classList, id, name, src, type_)
+import Html.Attributes exposing (checked, class, classList, id, name, src, title, type_)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
+import Json.Decode exposing (Decoder, int, list, string, succeed)
+import Json.Decode.Pipeline exposing (optional, required)
 import Platform.Sub as Sub
 import Random
 
@@ -16,7 +18,7 @@ type Status
 
 
 type alias Photo =
-    { url : String }
+    { url : String, size : Int, title : String }
 
 
 type alias Model =
@@ -28,7 +30,7 @@ type Msg
     | ClickedSize ThumbnailSize
     | ClickedSurpriseMe
     | GotRandomPhoto Photo
-    | GotPhotos (Result Http.Error String)
+    | GotPhotos (Result Http.Error (List Photo))
 
 
 type ThumbnailSize
@@ -45,8 +47,8 @@ initialModel =
 initialCommand : Cmd Msg
 initialCommand =
     Http.get
-        { url = "https://elm-in-action.com/photos/list"
-        , expect = Http.expectString GotPhotos
+        { url = "https://elm-in-action.com/photos/list.json"
+        , expect = Http.expectJson GotPhotos (list photoDecoder)
         }
 
 
@@ -143,11 +145,7 @@ update msg model =
         GotRandomPhoto photo ->
             ( { model | status = updateSelectedUrl model.status (Just photo.url) }, Cmd.none )
 
-        GotPhotos (Ok resp) ->
-            let
-                photos =
-                    respToPhotos resp
-            in
+        GotPhotos (Ok photos) ->
             ( { model | status = Loaded photos (defaultSelected photos) }, Cmd.none )
 
         GotPhotos (Err httpError) ->
@@ -156,6 +154,14 @@ update msg model =
 
 
 {- Helper functions -}
+
+
+photoDecoder : Decoder Photo
+photoDecoder =
+    succeed Photo
+        |> required "url" string
+        |> required "size" int
+        |> optional "title" string "(undefined)"
 
 
 updateSelectedUrl : Status -> Maybe String -> Status
@@ -201,11 +207,6 @@ errorToString error =
             errorMessage
 
 
-respToPhotos : String -> List Photo
-respToPhotos resp =
-    String.split "," resp |> List.map (\url -> { url = url })
-
-
 sizeToString : ThumbnailSize -> String
 sizeToString thumbnailSize =
     case thumbnailSize of
@@ -238,5 +239,6 @@ viewThumbnail maybeSelectedUrl photo =
         [ src (urlPrefix ++ photo.url)
         , classes
         , onClick (ClickedPhoto photo.url)
+        , title (photo.title ++ " [" ++ String.fromInt photo.size ++ " KB]")
         ]
         []
