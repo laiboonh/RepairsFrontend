@@ -1,7 +1,7 @@
 module Main exposing (Model, Msg(..), Status(..), ThumbnailSize(..), main, urlPrefix, view)
 
 import Browser
-import Html exposing (Html, button, div, h1, h3, img, input, label, text)
+import Html exposing (Html, button, div, figure, img, input, label, nav, p, section, text)
 import Html.Attributes exposing (checked, class, classList, id, name, src, title, type_)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..))
@@ -66,50 +66,82 @@ view : Model -> Html Msg
 view model =
     case model.status of
         Loading ->
-            div [ class "content" ] [ header ]
+            div [ class "container is-max-desktop" ] [ text "Loading..." ]
 
         Loaded photos maybeSelectedUrl ->
-            div [ class "content" ] [ header, viewSizeChooserTitle, viewSizeChooser model.chosenSize, surpriseButton, thumbnails photos maybeSelectedUrl model.chosenSize, largePhoto maybeSelectedUrl ]
+            div [ class "container is-max-desktop" ] [ header, form model, content model photos maybeSelectedUrl ]
 
         Errored error ->
-            div [ class "content" ] [ text error ]
+            div [ class "container is-max-desktop" ] [ text error ]
 
 
 header =
-    h1 [] [ text "Photo Booth" ]
+    section [ class "hero is-success" ]
+        [ div [ class "hero-body" ] [ p [ class "title" ] [ text "Photo Booth" ] ] ]
+
+
+form model =
+    section [ class "section" ]
+        [ nav [ class "level" ]
+            [ div [ class "level-left" ] [ div [ class "level-item" ] [ viewSizeChooser model.chosenSize ] ]
+            , div [ class "level-right" ] [ div [ class "level-item" ] [ surpriseButton ] ]
+            ]
+        ]
+
+
+content model photos maybeSelectedUrl =
+    div [ class "tile is-ancestor is-vertical" ]
+        [ div [ class "tile is-child" ] [ thumbnails photos maybeSelectedUrl model.chosenSize ]
+        , div [ class "tile is-child" ] [ div [ class "container" ] [ largePhoto maybeSelectedUrl ] ]
+        ]
 
 
 viewSizeChooserTitle =
-    h3 [] [ text "Thumbnail Size" ]
+    label [ class "label" ] [ text "Thumbnail Size" ]
 
 
 viewSizeChooser chosenSize =
-    div [ id "choose-size" ] (List.map (viewSizeRadio chosenSize) [ Small, Medium, Large ])
+    div [ class "field" ]
+        [ viewSizeChooserTitle
+        , div
+            [ id "choose-size", class "control" ]
+            (List.map (viewSizeRadio chosenSize) [ Small, Medium, Large ])
+        ]
 
 
 viewSizeRadio : ThumbnailSize -> ThumbnailSize -> Html Msg
 viewSizeRadio chosenSize thumbnailSize =
-    label [] [ input [ type_ "radio", name "size", onClick (ClickedSize thumbnailSize), checked (chosenSize == thumbnailSize) ] [], text (sizeToString thumbnailSize) ]
+    label [ class "radio" ] [ input [ type_ "radio", name "size", onClick (ClickedSize thumbnailSize), checked (chosenSize == thumbnailSize), class "radio" ] [], text (sizeToString thumbnailSize) ]
 
 
 thumbnails : List Photo -> Maybe String -> ThumbnailSize -> Html Msg
 thumbnails photos maybeSelectedUrl chosenSize =
-    div [ id "thumbnails", class (sizeToString chosenSize) ] (List.map (viewThumbnail maybeSelectedUrl) photos)
+    section [ class "section" ]
+        [ nav [ class "level" ]
+            [ div [ class "level-left" ]
+                [ div [ class "level-item" ] (List.map (viewThumbnail maybeSelectedUrl chosenSize) photos)
+                ]
+            ]
+        ]
 
 
 largePhoto : Maybe String -> Html Msg
 largePhoto maybeSelectedUrl =
-    case maybeSelectedUrl of
-        Just url ->
-            img [ src (urlPrefix ++ "large/" ++ url), class "large" ] []
+    let
+        image =
+            case maybeSelectedUrl of
+                Just url ->
+                    img [ src (urlPrefix ++ "large/" ++ url), class "large" ] []
 
-        Nothing ->
-            img [ class "large" ] []
+                Nothing ->
+                    img [ class "large" ] []
+    in
+    section [ class "section" ] [ image ]
 
 
 surpriseButton : Html Msg
 surpriseButton =
-    button [ onClick ClickedSurpriseMe ] [ text "Surprise Me!" ]
+    button [ onClick ClickedSurpriseMe, class "button is-link" ] [ text "Surprise Me!" ]
 
 
 
@@ -207,6 +239,19 @@ errorToString error =
             errorMessage
 
 
+sizeToClass : ThumbnailSize -> String
+sizeToClass thumbnailSize =
+    case thumbnailSize of
+        Large ->
+            "image is-128x128"
+
+        Medium ->
+            "image is-96x96"
+
+        Small ->
+            "image is-64x64"
+
+
 sizeToString : ThumbnailSize -> String
 sizeToString thumbnailSize =
     case thumbnailSize of
@@ -224,8 +269,8 @@ urlPrefix =
     "https://elm-in-action.com/"
 
 
-viewThumbnail : Maybe String -> Photo -> Html Msg
-viewThumbnail maybeSelectedUrl photo =
+viewThumbnail : Maybe String -> ThumbnailSize -> Photo -> Html Msg
+viewThumbnail maybeSelectedUrl chosenSize photo =
     let
         classes =
             case maybeSelectedUrl of
@@ -235,10 +280,14 @@ viewThumbnail maybeSelectedUrl photo =
                 Nothing ->
                     classList []
     in
-    img
-        [ src (urlPrefix ++ photo.url)
-        , classes
-        , onClick (ClickedPhoto photo.url)
-        , title (photo.title ++ " [" ++ String.fromInt photo.size ++ " KB]")
+    div [ class "level-item" ]
+        [ figure [ class (sizeToClass chosenSize) ]
+            [ img
+                [ src (urlPrefix ++ photo.url)
+                , classes
+                , onClick (ClickedPhoto photo.url)
+                , title (photo.title ++ " [" ++ String.fromInt photo.size ++ " KB]")
+                ]
+                []
+            ]
         ]
-        []

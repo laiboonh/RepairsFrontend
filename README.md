@@ -21,4 +21,9 @@
 # Development
 1. `npx elm-test --watch`
 2. To add dependencies `elm install elm/random`
+3. To have quick feedback loop by watching file for changes
+   1. `sudo npm install -g chokidar-cli`
+   2. `chokidar "**/*.elm" -c "./optimize.sh"`
+   3. Reload `build/index.hmtl` in browser
+
 
