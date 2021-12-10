@@ -1,7 +1,6 @@
 module MainTests exposing (..)
 
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
 import Html.Attributes as Attr
 import Main exposing (Model, Msg(..), Status(..), ThumbnailSize(..), urlPrefix, view)
 import Test exposing (..)
@@ -16,7 +15,12 @@ photos =
 
 initialModel : Model
 initialModel =
-    { status = Loaded photos (Just "1.jpeg"), chosenSize = Medium }
+    { status = Loaded photos (Just "1.jpeg")
+    , chosenSize = Medium
+    , showLoginModal = False
+    , disableButtons = False
+    , userName = ""
+    }
 
 
 renderImage : Test

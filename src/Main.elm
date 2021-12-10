@@ -1,12 +1,13 @@
 module Main exposing (Model, Msg(..), Status(..), ThumbnailSize(..), main, urlPrefix, view)
 
 import Browser
-import Html exposing (Html, button, div, figure, img, input, label, nav, p, section, text)
-import Html.Attributes exposing (checked, class, classList, id, name, src, title, type_)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, figure, footer, header, img, input, label, nav, p, section, text)
+import Html.Attributes exposing (checked, class, classList, id, name, placeholder, src, title, type_)
+import Html.Events exposing (onClick, onInput)
 import Http exposing (Error(..))
 import Json.Decode exposing (Decoder, int, list, string, succeed)
 import Json.Decode.Pipeline exposing (optional, required)
+import Json.Encode as Encode
 import Platform.Sub as Sub
 import Random
 
@@ -22,15 +23,24 @@ type alias Photo =
 
 
 type alias Model =
-    { status : Status, chosenSize : ThumbnailSize }
+    { status : Status
+    , chosenSize : ThumbnailSize
+    , showLoginModal : Bool
+    , disableButtons : Bool
+    , userName : String
+    }
 
 
 type Msg
     = ClickedPhoto String
     | ClickedSize ThumbnailSize
     | ClickedSurpriseMe
+    | ClickedLogin
+    | ToggleLoginModal
     | GotRandomPhoto Photo
     | GotPhotos (Result Http.Error (List Photo))
+    | Username String
+    | LoggedIn (Result Http.Error ())
 
 
 type ThumbnailSize
@@ -41,7 +51,12 @@ type ThumbnailSize
 
 initialModel : Model
 initialModel =
-    { status = Loading, chosenSize = Medium }
+    { status = Loading
+    , chosenSize = Medium
+    , showLoginModal = False
+    , disableButtons = False
+    , userName = ""
+    }
 
 
 initialCommand : Cmd Msg
@@ -49,6 +64,21 @@ initialCommand =
     Http.get
         { url = "https://elm-in-action.com/photos/list.json"
         , expect = Http.expectJson GotPhotos (list photoDecoder)
+        }
+
+
+loginCommand : String -> Cmd Msg
+loginCommand userName =
+    let
+        encode =
+            Encode.object
+                [ ( "id", Encode.string userName )
+                ]
+    in
+    Http.post
+        { url = "https://blooming-anchorage-54785.herokuapp.com/login"
+        , body = Http.jsonBody encode
+        , expect = Http.expectWhatever LoggedIn
         }
 
 
@@ -69,13 +99,13 @@ view model =
             div [ class "container is-max-desktop" ] [ text "Loading..." ]
 
         Loaded photos maybeSelectedUrl ->
-            div [ class "container is-max-desktop" ] [ header, form model, content model photos maybeSelectedUrl ]
+            div [ class "container is-max-desktop" ] [ head, form model, content model photos maybeSelectedUrl, loginModal model ]
 
         Errored error ->
             div [ class "container is-max-desktop" ] [ text error ]
 
 
-header =
+head =
     section [ class "hero is-success" ]
         [ div [ class "hero-body" ] [ p [ class "title" ] [ text "Photo Booth" ] ] ]
 
@@ -84,7 +114,7 @@ form model =
     section [ class "section" ]
         [ nav [ class "level" ]
             [ div [ class "level-left" ] [ div [ class "level-item" ] [ viewSizeChooser model.chosenSize ] ]
-            , div [ class "level-right" ] [ div [ class "level-item" ] [ surpriseButton ] ]
+            , div [ class "level-right" ] [ div [ class "level-item" ] [ surpriseButton ], div [ class "level-item" ] [ loginButton ] ]
             ]
         ]
 
@@ -144,6 +174,35 @@ surpriseButton =
     button [ onClick ClickedSurpriseMe, class "button is-link" ] [ text "Surprise Me!" ]
 
 
+loginButton : Html Msg
+loginButton =
+    button [ onClick ToggleLoginModal, class "button is-link" ] [ text "Login" ]
+
+
+loginModal : Model -> Html Msg
+loginModal model =
+    div [ classList [ ( "modal", True ), ( "is-active", model.showLoginModal ) ] ]
+        [ div [ class "modal-background" ] []
+        , div [ class "modal-card" ]
+            [ header
+                [ class "modal-card-head" ]
+                [ p [ class "modal-card-title" ] [ text "Login" ], button [ onClick ToggleLoginModal, class "delete" ] [] ]
+            , section [ class "modal-card-body" ]
+                [ div [ class "field" ]
+                    [ label [ class "label" ] [ text "Username" ]
+                    , div [ class "control" ]
+                        [ input [ onInput Username, class "input", type_ "text", placeholder "fec298ac-28ed-4144-914c-bc06816015bf" ] []
+                        ]
+                    ]
+                ]
+            , footer [ class "modal-card-foot" ]
+                [ button [ onClick ClickedLogin, classList [ ( "button is-success", True ), ( "is-loading", model.disableButtons ) ] ] [ text "Go!" ]
+                , button [ onClick ToggleLoginModal, class "button" ] [ text "Cancel" ]
+                ]
+            ]
+        ]
+
+
 
 {- update -}
 
@@ -151,8 +210,23 @@ surpriseButton =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Username x ->
+            ( { model | userName = x }, Cmd.none )
+
         ClickedPhoto url ->
             ( { model | status = updateSelectedUrl model.status (Just url) }, Cmd.none )
+
+        ToggleLoginModal ->
+            ( { model | showLoginModal = not model.showLoginModal }, Cmd.none )
+
+        ClickedLogin ->
+            ( { model | disableButtons = True }, loginCommand model.userName )
+
+        LoggedIn (Ok ()) ->
+            ( { model | disableButtons = False }, Cmd.none )
+
+        LoggedIn (Err httpError) ->
+            ( { model | disableButtons = False }, Cmd.none )
 
         ClickedSurpriseMe ->
             case model.status of
